@@ -37,6 +37,7 @@ import org.cloudcoder.app.shared.model.Event;
 import org.cloudcoder.app.shared.model.ModelObjectSchema;
 import org.cloudcoder.app.shared.model.Module;
 import org.cloudcoder.app.shared.model.Problem;
+import org.cloudcoder.app.shared.model.ProblemAnalysisTagUrl;
 import org.cloudcoder.app.shared.model.Quiz;
 import org.cloudcoder.app.shared.model.StartedQuiz;
 import org.cloudcoder.app.shared.model.SubmissionReceipt;
@@ -44,6 +45,8 @@ import org.cloudcoder.app.shared.model.Term;
 import org.cloudcoder.app.shared.model.TestCase;
 import org.cloudcoder.app.shared.model.TestResult;
 import org.cloudcoder.app.shared.model.User;
+import org.cloudcoder.app.shared.model.UserCourseTag;
+import org.cloudcoder.app.shared.model.UserProblemTag;
 
 /**
  * Create the webapp database, using the metadata information
@@ -72,6 +75,9 @@ public class CreateWebappDatabase {
 		Quiz.SCHEMA,
 		Module.SCHEMA,
 		StartedQuiz.SCHEMA,
+		ProblemAnalysisTagUrl.SCHEMA,
+		UserCourseTag.SCHEMA,
+		UserProblemTag.SCHEMA,
 	};
 	
 	private static class Props {

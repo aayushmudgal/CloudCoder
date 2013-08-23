@@ -128,6 +128,10 @@
     <servlet-name>RegisterStudents</servlet-name>
     <servlet-class>org.cloudcoder.app.server.servlet.RegisterStudents</servlet-class>
   </servlet>
+  <servlet>
+    <servlet-name>Hint</servlet-name>
+    <servlet-class>org.cloudcoder.app.server.rpc.HintServiceImpl</servlet-class>
+  </servlet>
   <servlet-mapping>
     <servlet-name>RegisterStudents</servlet-name>
     <url-pattern>/cloudcoder/registerStudents</url-pattern>
@@ -161,6 +165,10 @@
   <servlet-mapping>
     <servlet-name>Run</servlet-name>
     <url-pattern>/cloudcoder/run</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>Hint</servlet-name>
+    <url-pattern>/cloudcoder/hint</url-pattern>
   </servlet-mapping>
   
   <!-- Admin servlets. -->

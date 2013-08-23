@@ -18,6 +18,7 @@
 package org.cloudcoder.app.client.page;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.cloudcoder.app.client.model.ChangeFromAceOnChangeEvent;
@@ -32,6 +33,7 @@ import org.cloudcoder.app.client.view.ChoiceDialogBox;
 import org.cloudcoder.app.client.view.CompilerDiagnosticListView;
 import org.cloudcoder.app.client.view.DevActionsPanel;
 import org.cloudcoder.app.client.view.IResultsTabPanelWidget;
+import org.cloudcoder.app.client.view.OkDialogBox;
 import org.cloudcoder.app.client.view.PageNavPanel;
 import org.cloudcoder.app.client.view.ProblemDescriptionView;
 import org.cloudcoder.app.client.view.QuizIndicatorView;
@@ -44,9 +46,11 @@ import org.cloudcoder.app.shared.model.ChangeType;
 import org.cloudcoder.app.shared.model.CloudCoderAuthenticationException;
 import org.cloudcoder.app.shared.model.CompilationOutcome;
 import org.cloudcoder.app.shared.model.CompilerDiagnostic;
+import org.cloudcoder.app.shared.model.Hint;
 import org.cloudcoder.app.shared.model.Language;
 import org.cloudcoder.app.shared.model.NamedTestResult;
 import org.cloudcoder.app.shared.model.Problem;
+import org.cloudcoder.app.shared.model.ProblemAnalysisTagUrl;
 import org.cloudcoder.app.shared.model.ProblemText;
 import org.cloudcoder.app.shared.model.QuizEndedException;
 import org.cloudcoder.app.shared.model.SubmissionResult;
@@ -315,6 +319,14 @@ public class DevelopmentPage extends CloudCoderPage {
 				}
 			});
 			
+			// Add hint-handler, if the tags match up for us to do so
+			devActionsPanel.setHintHandler(new Runnable() {
+                @Override
+                public void run() {
+                    doHint();
+                }
+            });
+			
 			// Tell the server which problem we want to work on
 			setProblem(session, problem);
 		}
@@ -378,6 +390,53 @@ public class DevelopmentPage extends CloudCoderPage {
 			aceEditor.setReadOnly(false);
 			onCleanCallback = null;
 			GWT.log("Done with onClean callback");
+		}
+		
+		private void doHint() {
+		    addSessionObject(StatusMessage.pending("Requesting a hint, please wait..."));
+
+            Problem problem = getSession().get(Problem.class);
+            User user=getSession().get(User.class);
+            GWT.log("username requesting hint: " +user.getUsername());
+            
+            // TODO lookup applicable tags
+            ProblemAnalysisTagUrl analysis=new ProblemAnalysisTagUrl();
+            analysis.setAnalysisUrl("http://localhost:8890/kelly/hint.php");
+            analysis.setProblemId(problem.getProblemId());
+            analysis.setTag("kelly");
+            List<ProblemAnalysisTagUrl> analyses=new LinkedList<ProblemAnalysisTagUrl>();
+            analyses.add(analysis);
+
+            // Get current text of code
+            String text = aceEditor.getText();
+            
+            RPC.hintService.requestHint(problem, user, text, analyses, new AsyncCallback<Hint>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    if (caught instanceof CloudCoderAuthenticationException) {
+                        recoverFromServerSessionTimeout(new Runnable(){
+                            public void run() {
+                                // Try again!
+                                //FIXME refactor into 2 methods so that this works
+                                //doHint();
+                            }
+                        });
+                    } else {
+                        if (caught.getMessage()==null) {
+                            addSessionObject(StatusMessage.error("Error requesting a hint: " +caught.getClass()));
+                        }else {
+                            addSessionObject(StatusMessage.error("Error requesting a hint: " +caught.getMessage()));
+                        }
+                        
+                    }
+                }
+                @Override
+                public void onSuccess(Hint result) {
+                    // FIXME update/create the hint tab at the bottom
+                    OkDialogBox dialog=new OkDialogBox("hints are awesome", result.getHintText());
+                    dialog.center();
+                }
+            });
 		}
 
 		private void doSubmit() {

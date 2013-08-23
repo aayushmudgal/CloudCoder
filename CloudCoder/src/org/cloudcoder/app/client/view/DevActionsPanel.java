@@ -41,6 +41,8 @@ public class DevActionsPanel extends ResizeComposite {
 	private static final double BUTTON_WIDTH_PX = 120.0;
 	private Runnable submitHandler;
 	private Runnable resetHandler;
+	private Runnable hintHandler;
+	private Button hintButton;
 	
 	/**
 	 * Constructor.
@@ -58,9 +60,25 @@ public class DevActionsPanel extends ResizeComposite {
 				}
 			}
 		});
+		
 		layoutPanel.add(submitButton);
 		layoutPanel.setWidgetRightWidth(submitButton, 0.0, Unit.PX, BUTTON_WIDTH_PX, Unit.PX);
 		layoutPanel.setWidgetBottomHeight(submitButton, 10.0, Unit.PX, BUTTON_HEIGHT_PX, Unit.PX);
+		
+		hintButton = new Button("Hint please!");
+		// initially the hint button is disabled, since not all exercises have hints enables
+		hintButton.setEnabled(false);
+		hintButton.addClickHandler(new ClickHandler() {
+		    @Override
+		    public void onClick(ClickEvent event) {
+		        if (hintHandler != null) {
+		            hintHandler.run();
+		        }
+		    }
+		});
+		layoutPanel.add(hintButton);
+		layoutPanel.setWidgetRightWidth(hintButton, 0.0, Unit.PX, BUTTON_WIDTH_PX, Unit.PX);
+		layoutPanel.setWidgetBottomHeight(hintButton, 10.0 + BUTTON_HEIGHT_PX + 10.0, Unit.PX, BUTTON_HEIGHT_PX, Unit.PX);
 		
 		Button resetButton = new Button("Reset");
 		resetButton.addClickHandler(new ClickHandler() {
@@ -72,9 +90,11 @@ public class DevActionsPanel extends ResizeComposite {
 			}
 		});
 		layoutPanel.add(resetButton);
+		// Reset location depends on whether we have already added a hint button
+		double resetHeight=10 + 2*BUTTON_HEIGHT_PX + 20;
 		layoutPanel.setWidgetRightWidth(resetButton, 0.0, Unit.PX, BUTTON_WIDTH_PX, Unit.PX);
-		layoutPanel.setWidgetBottomHeight(resetButton, 10.0 + BUTTON_HEIGHT_PX + 10.0, Unit.PX, BUTTON_HEIGHT_PX, Unit.PX);
-
+		layoutPanel.setWidgetBottomHeight(resetButton, resetHeight, Unit.PX, BUTTON_HEIGHT_PX, Unit.PX);
+		
 		initWidget(layoutPanel);
 	}
 	
@@ -85,6 +105,7 @@ public class DevActionsPanel extends ResizeComposite {
 	 */
 	public void setSubmitHandler(Runnable submitHandler) {
 		this.submitHandler = submitHandler;
+		hintButton.setEnabled(true);
 	}
 	
 	/**
@@ -94,5 +115,14 @@ public class DevActionsPanel extends ResizeComposite {
 	 */
 	public void setResetHandler(Runnable resetHandler) {
 		this.resetHandler = resetHandler;
+	}
+	
+	/**
+	 * Set the handler to run when the Hint button is clicked.
+	 * 
+	 * @param hintHandler
+	 */
+	public void setHintHandler(Runnable hintHandler) {
+	    this.hintHandler=hintHandler;
 	}
 }
