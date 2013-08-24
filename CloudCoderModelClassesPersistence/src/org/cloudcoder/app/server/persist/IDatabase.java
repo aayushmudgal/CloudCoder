@@ -38,6 +38,7 @@ import org.cloudcoder.app.shared.model.NamedTestResult;
 import org.cloudcoder.app.shared.model.OperationResult;
 import org.cloudcoder.app.shared.model.Pair;
 import org.cloudcoder.app.shared.model.Problem;
+import org.cloudcoder.app.shared.model.ProblemAnalysisTagUrl;
 import org.cloudcoder.app.shared.model.ProblemAndSubmissionReceipt;
 import org.cloudcoder.app.shared.model.ProblemAndTestCaseList;
 import org.cloudcoder.app.shared.model.ProblemList;
@@ -660,5 +661,17 @@ public interface IDatabase {
 	 * @return list of {@link RepoProblemRating}s for the exercise
 	 */
 	public List<RepoProblemRating> getRatingsForRepoProblem(int repoProblemId);
+
+    /**
+     * Lookup the {@link ProblemAnalysisTagUrl}s that apply to the given user and problem.
+     * This method will also lookup any tags generally applied to all exercises in
+     * the course as well.
+     * 
+     * @param userId The id of the user working on the problem
+     * @param problemId The id of the problem
+     * @return array of {@link ProblemAnalysisTagUrl}s that apply to this user, problem, or course.
+     */
+    public ProblemAnalysisTagUrl[] lookupProblemAnalysisTagUrls(Integer userId, Integer problemId);
+        
 
 }

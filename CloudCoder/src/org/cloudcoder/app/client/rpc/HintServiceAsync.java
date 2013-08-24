@@ -17,8 +17,6 @@
 
 package org.cloudcoder.app.client.rpc;
 
-import java.util.List;
-
 import org.cloudcoder.app.shared.model.Hint;
 import org.cloudcoder.app.shared.model.Problem;
 import org.cloudcoder.app.shared.model.ProblemAnalysisTagUrl;
@@ -32,6 +30,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  */
 public interface HintServiceAsync
 {
-    public void requestHint(Problem problem, User user, String programText, List<ProblemAnalysisTagUrl> analyses, AsyncCallback<Hint> callback);
+    public void requestHint(Problem problem, User user, String programText, ProblemAnalysisTagUrl[] analyses, AsyncCallback<Hint[]> callback);
     
+    public void getProblemAnalyses(Integer userId, Integer problemId, AsyncCallback<ProblemAnalysisTagUrl[]> callback);
 }

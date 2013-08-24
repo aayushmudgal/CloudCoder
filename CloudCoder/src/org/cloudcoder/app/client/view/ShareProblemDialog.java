@@ -20,7 +20,6 @@ package org.cloudcoder.app.client.view;
 import org.cloudcoder.app.client.rpc.RPC;
 import org.cloudcoder.app.shared.model.ICallback;
 import org.cloudcoder.app.shared.model.OperationResult;
-import org.cloudcoder.app.shared.model.Problem;
 import org.cloudcoder.app.shared.model.ProblemAndTestCaseList;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;

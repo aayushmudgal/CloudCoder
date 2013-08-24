@@ -17,14 +17,28 @@
 
 package org.cloudcoder.app.server.rpc;
 
-import java.util.List;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.StringWriter;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.StatusLine;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.cloudcoder.app.client.rpc.HintService;
+import org.cloudcoder.app.server.persist.Database;
 import org.cloudcoder.app.shared.model.CloudCoderAuthenticationException;
 import org.cloudcoder.app.shared.model.Hint;
 import org.cloudcoder.app.shared.model.Problem;
 import org.cloudcoder.app.shared.model.ProblemAnalysisTagUrl;
 import org.cloudcoder.app.shared.model.User;
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,16 +52,76 @@ public class HintServiceImpl extends RemoteServiceServlet implements HintService
 {
     private static final long serialVersionUID = 1L;
     private static final Logger logger=LoggerFactory.getLogger(HintServiceImpl.class);
+    private static final String ENCODING="UTF-8";
     
     @Override
-    public Hint requestHint(Problem problem, User user, String programText, List<ProblemAnalysisTagUrl> analyses)
+    public Hint[] requestHint(Problem problem, User user, String programText, ProblemAnalysisTagUrl[] analyses)
     throws CloudCoderAuthenticationException
     {
         // Server-side code
-        // TODO JSONify the hint request and pass it along to the webservice
-        // Receive the result and return it
-        Hint result=new Hint();
-        result.setHintText("Hint hint hint!");
-        return result;
+        Hint[] results=new Hint[analyses.length];
+
+        for (int i=0; i<analyses.length; i++) {
+            ProblemAnalysisTagUrl analysis=analyses[i];
+
+            // JSONify the request for help
+            JSONObject jsonObj=convertHintRequestToJSON(problem.getProblemId(), user.getId(), programText);
+            
+            // TODO: Make these connections timeout at some point
+            HttpClient client = new DefaultHttpClient();
+            
+            try {
+                // Serialize the hint request into JSON
+                StringWriter sw = new StringWriter();
+                IOUtils.write(jsonObj.toString(), sw);
+                StringEntity entity = new StringEntity(sw.toString(), ContentType.create("application/json", "UTF-8"));
+            
+                // create the post operation
+                HttpPost post = new HttpPost(analysis.getAnalysisUrl());
+                post.setEntity(entity);
+
+                // Execute the HTTP POST operation
+                HttpResponse response = client.execute(post);
+
+                BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), ENCODING));
+                StringBuilder builder = new StringBuilder();
+                for (String line = null; (line = reader.readLine()) != null;) {
+                    builder.append(line).append("\n");
+                }
+                
+                StatusLine statusLine = response.getStatusLine();
+
+                if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
+                    System.out.println("Success!");
+                    results[i]=new Hint();
+                    results[i].setHintTag(analysis.getTag());
+                    results[i].setHintText(builder.toString());
+                } else if (statusLine.getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
+                    logger.error("Web Service hint failure: Unauthorized HTTP access to "+analysis.getAnalysisUrl());
+                } else {
+                    logger.error("Web Service hint failure: Failed for some other reason");
+                }
+            } catch (IOException e) {
+                logger.error("Unable to get hint for "+analysis.getTag()+" from "+analysis.getAnalysisUrl(), e);
+            } finally {
+                client.getConnectionManager().shutdown();
+            }
+        }
+        return results;
+    }
+    
+    @SuppressWarnings("unchecked")
+    private static JSONObject convertHintRequestToJSON(Integer problemId, Integer userId, String code) {
+        JSONObject obj=new JSONObject();
+        obj.put("code", code);
+        obj.put("userId", userId);
+        obj.put("problemId", problemId);
+        return obj;
+    }
+    
+    public ProblemAnalysisTagUrl[] getProblemAnalyses(Integer userId, Integer problemId)
+    throws CloudCoderAuthenticationException
+    {
+        return Database.getInstance().lookupProblemAnalysisTagUrls(userId, problemId);
     }
 }

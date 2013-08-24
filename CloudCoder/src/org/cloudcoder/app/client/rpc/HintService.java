@@ -17,8 +17,6 @@
 
 package org.cloudcoder.app.client.rpc;
 
-import java.util.List;
-
 import org.cloudcoder.app.shared.model.CloudCoderAuthenticationException;
 import org.cloudcoder.app.shared.model.Hint;
 import org.cloudcoder.app.shared.model.Problem;
@@ -35,5 +33,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("hint")
 public interface HintService extends RemoteService
 {
-    public Hint requestHint(Problem problem, User user, String programText, List<ProblemAnalysisTagUrl> analyses) throws CloudCoderAuthenticationException;
+    public Hint[] requestHint(Problem problem, User user, String programText, ProblemAnalysisTagUrl[] analyses) throws CloudCoderAuthenticationException;
+    
+    public ProblemAnalysisTagUrl[] getProblemAnalyses(Integer userId, Integer problemId) throws CloudCoderAuthenticationException;
 }

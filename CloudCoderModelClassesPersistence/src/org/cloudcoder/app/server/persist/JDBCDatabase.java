@@ -50,6 +50,7 @@ import org.cloudcoder.app.server.persist.txn.GetModulesForCourse;
 import org.cloudcoder.app.server.persist.txn.GetMostRecentChangeForUserAndProblem;
 import org.cloudcoder.app.server.persist.txn.GetMostRecentFullTextChange;
 import org.cloudcoder.app.server.persist.txn.GetOrAddLatestSubmissionReceipt;
+import org.cloudcoder.app.server.persist.txn.GetProblemAnalysisTagUrls;
 import org.cloudcoder.app.server.persist.txn.GetProblemAndSubscriptionReceiptsForUserInCourse;
 import org.cloudcoder.app.server.persist.txn.GetProblemForProblemId;
 import org.cloudcoder.app.server.persist.txn.GetProblemForUser;
@@ -99,6 +100,7 @@ import org.cloudcoder.app.shared.model.NamedTestResult;
 import org.cloudcoder.app.shared.model.OperationResult;
 import org.cloudcoder.app.shared.model.Pair;
 import org.cloudcoder.app.shared.model.Problem;
+import org.cloudcoder.app.shared.model.ProblemAnalysisTagUrl;
 import org.cloudcoder.app.shared.model.ProblemAndSubmissionReceipt;
 import org.cloudcoder.app.shared.model.ProblemAndTestCaseList;
 import org.cloudcoder.app.shared.model.ProblemList;
@@ -569,5 +571,11 @@ public class JDBCDatabase implements IDatabase {
 		// Success!
 		return result;
 	}
+
+    @Override
+    public ProblemAnalysisTagUrl[] lookupProblemAnalysisTagUrls(Integer userId,Integer problemId)
+    {
+        return databaseRun(new GetProblemAnalysisTagUrls(userId, problemId));
+    }
 	
 }

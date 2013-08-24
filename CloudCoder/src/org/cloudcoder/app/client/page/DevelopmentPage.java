@@ -18,7 +18,6 @@
 package org.cloudcoder.app.client.page;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.cloudcoder.app.client.model.ChangeFromAceOnChangeEvent;
@@ -66,14 +65,21 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.LayoutPanel;
+import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
+import com.google.gwt.user.client.ui.Widget;
 
 import edu.ycp.cs.dh.acegwt.client.ace.AceAnnotationType;
 import edu.ycp.cs.dh.acegwt.client.ace.AceEditor;
@@ -119,6 +125,12 @@ public class DevelopmentPage extends CloudCoderPage {
 	private enum ResetChoice {
 		CANCEL,
 		CONFIRM,
+	}
+	
+	private enum HintState {
+	    WAITING,
+	    DISABLED,
+	    ENABLED,
 	}
 
 	/**
@@ -224,6 +236,40 @@ public class DevelopmentPage extends CloudCoderPage {
 			resultsTabPanel.add(w, title);
 			resultsTabPanelWidgetList.add(w); // keep track of all results tab panel widgets
 		}
+		
+		private class HintPanel extends HTMLPanel implements IResultsTabPanelWidget
+		{
+            /**
+             * @param safeHtml
+             */
+            public HintPanel(SafeHtml safeHtml) {
+                super(safeHtml);
+            }
+            @Override
+            public void setSelected() {
+                // Not sure what to do here
+            }
+		}
+		
+		private void updateHintTabs(Hint[] hints){
+		    // remove previous hint tabs
+		    for (int i=resultsTabPanel.getWidgetCount()-1; i>=2; i--) {
+		        resultsTabPanel.remove(i);
+		        resultsTabPanelWidgetList.remove(i);
+		    }
+		    for (Hint hint : hints) {
+		        // TODO encode whether hints are plain text or HTML
+		        // Currently we assume plain text
+		        HintPanel panel=new HintPanel(SafeHtmlUtils.fromString(hint.getHintText()));
+		        panel.setTitle(hint.getHintTag());
+		        resultsTabPanel.add(panel, hint.getHintTag());
+		        resultsTabPanelWidgetList.add(panel);
+		    }
+		    // select the first hint
+		    if (resultsTabPanel.getWidgetCount()>2) {
+		        resultsTabPanel.selectTab(2, false);
+		    }
+		}
 
 		public void activate(final Session session, final SubscriptionRegistrar subscriptionRegistrar) {
 			final Problem problem = session.get(Problem.class);
@@ -319,6 +365,27 @@ public class DevelopmentPage extends CloudCoderPage {
 				}
 			});
 			
+			User user=getSession().get(User.class);
+			
+            // Requires changes to IDatabase, JDBCDatabase, and creation of a persist.txn
+            // These should be looked up during activate() and stored in the session
+            // XXX should change to ProblemAnalysisTagUrl[]?
+			getSession().add(HintState.WAITING);
+			RPC.hintService.getProblemAnalyses(user.getId(), problem.getProblemId(), new AsyncCallback<ProblemAnalysisTagUrl[]>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    GWT.log("Unable to lookup problem analyses", caught);
+                    getSession().add(HintState.DISABLED);
+                }
+                @Override
+                public void onSuccess(ProblemAnalysisTagUrl[] result) {
+                    // Add to the session
+                    getSession().add(result);
+                    GWT.log("on sucess callback received "+result.length+" analyses to be run");
+                    getSession().add(HintState.ENABLED);
+                }
+			});
+			
 			// Add hint-handler, if the tags match up for us to do so
 			devActionsPanel.setHintHandler(new Runnable() {
                 @Override
@@ -394,30 +461,42 @@ public class DevelopmentPage extends CloudCoderPage {
 		
 		private void doHint() {
 		    addSessionObject(StatusMessage.pending("Requesting a hint, please wait..."));
-
+		    
+		    // Get user and problem
             Problem problem = getSession().get(Problem.class);
             User user=getSession().get(User.class);
             GWT.log("username requesting hint: " +user.getUsername());
             
-            // TODO lookup applicable tags
-            ProblemAnalysisTagUrl analysis=new ProblemAnalysisTagUrl();
-            analysis.setAnalysisUrl("http://localhost:8890/kelly/hint.php");
-            analysis.setProblemId(problem.getProblemId());
-            analysis.setTag("kelly");
-            List<ProblemAnalysisTagUrl> analyses=new LinkedList<ProblemAnalysisTagUrl>();
-            analyses.add(analysis);
-
+            // Get the available analyses (hint generating web services) for this problem
+            // and the given user
+            HintState hintMode=getSession().get(HintState.class);
+            GWT.log("hint state: "+hintMode);
+            ProblemAnalysisTagUrl[] analyses=getSession().get(ProblemAnalysisTagUrl[].class);
+            if (hintMode==HintState.WAITING || hintMode==HintState.DISABLED ||
+                    analyses==null || analyses.length==0)
+            {
+                OkDialogBox dialog=new OkDialogBox("Hints are disabled",
+                        "Hints are disabled for this exercise, " +
+                        "or there are not hints available");
+                dialog.center();
+                addSessionObject(StatusMessage.information("Hints not available for this exercise"));
+                return;
+            }
+//            for (ProblemAnalysisTagUrl p : analyses) {
+//                GWT.log("Analysis enabled: "+p.getTag());
+//            }
+            
             // Get current text of code
             String text = aceEditor.getText();
             
-            RPC.hintService.requestHint(problem, user, text, analyses, new AsyncCallback<Hint>() {
+            RPC.hintService.requestHint(problem, user, text, analyses, new AsyncCallback<Hint[]>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     if (caught instanceof CloudCoderAuthenticationException) {
                         recoverFromServerSessionTimeout(new Runnable(){
                             public void run() {
                                 // Try again!
-                                //FIXME refactor into 2 methods so that this works
+                                //FIXME refactor into 2 methods so that we can retry this method
                                 //doHint();
                             }
                         });
@@ -431,10 +510,9 @@ public class DevelopmentPage extends CloudCoderPage {
                     }
                 }
                 @Override
-                public void onSuccess(Hint result) {
-                    // FIXME update/create the hint tab at the bottom
-                    OkDialogBox dialog=new OkDialogBox("hints are awesome", result.getHintText());
-                    dialog.center();
+                public void onSuccess(Hint[] result) {
+                    updateHintTabs(result);
+                    addSessionObject(StatusMessage.goodNews("Received "+result.length+" hints; Check the hint tab(s)"));
                 }
             });
 		}

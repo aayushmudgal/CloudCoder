@@ -41,7 +41,15 @@ public class DevActionsPanel extends ResizeComposite {
 	private static final double BUTTON_WIDTH_PX = 120.0;
 	private Runnable submitHandler;
 	private Runnable resetHandler;
-	private Runnable hintHandler;
+	// Default handler informs user that hints are not enabled
+	private Runnable hintHandler=new Runnable() {
+        @Override
+        public void run() {
+            OkDialogBox dialog=new OkDialogBox("Hints not available", 
+                    "Hints are not available for this exercise");
+            dialog.center();
+        }
+    };
 	private Button hintButton;
 	
 	/**
