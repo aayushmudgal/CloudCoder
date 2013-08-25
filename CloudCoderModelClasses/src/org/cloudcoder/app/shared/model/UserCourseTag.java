@@ -17,7 +17,7 @@ public class UserCourseTag implements IModelObject<UserCourseTag>
         public Integer get(UserCourseTag obj) { return obj.getCourseId(); }
     };
     public static final ModelObjectField<UserCourseTag, String> TAG=
-            new ModelObjectField<UserCourseTag, String>("tag", String.class, 256, ModelObjectIndexType.NON_UNIQUE) {
+            new ModelObjectField<UserCourseTag, String>("tag", String.class, 128, ModelObjectIndexType.NON_UNIQUE) {
         public void set(UserCourseTag obj, String value) { obj.setTag(value); }
         public String get(UserCourseTag obj) { return obj.getTag(); }
     };
@@ -25,7 +25,12 @@ public class UserCourseTag implements IModelObject<UserCourseTag>
     public static final ModelObjectSchema<UserCourseTag> SCHEMA_V0 = new ModelObjectSchema<UserCourseTag>("user_course_tag")
             .add(USER_ID)
             .add(COURSE_ID)
-            .add(TAG);
+            .add(TAG).addIndex(
+                    new ModelObjectIndex<UserCourseTag>(ModelObjectIndexType.UNIQUE)
+                    .addField(USER_ID)
+                    .addField(COURSE_ID)
+                    .addField(TAG)
+                    );
     
     /**
      * Description of fields (current schema version).

@@ -12,13 +12,13 @@ public class ProblemAnalysisTagUrl implements IModelObject<ProblemAnalysisTagUrl
     
     /** {@link ModelObjectField} for problem id. */
     public static final ModelObjectField<ProblemAnalysisTagUrl, Integer> PROBLEM_ID =
-            new ModelObjectField<ProblemAnalysisTagUrl, Integer>("problem_id", Integer.class, 0, ModelObjectIndexType.IDENTITY) {
+            new ModelObjectField<ProblemAnalysisTagUrl, Integer>("problem_id", Integer.class, 0, ModelObjectIndexType.NON_UNIQUE) {
         public void set(ProblemAnalysisTagUrl obj, Integer value) { obj.setProblemId(value); }
         public Integer get(ProblemAnalysisTagUrl obj) { return obj.getProblemId(); }
     };
     /** {@link ModelObjectField} for tag. */
     public static final ModelObjectField<ProblemAnalysisTagUrl, String> TAG =
-            new ModelObjectField<ProblemAnalysisTagUrl, String>("tag", String.class, 256, ModelObjectIndexType.NON_UNIQUE) {
+            new ModelObjectField<ProblemAnalysisTagUrl, String>("tag", String.class, 128, ModelObjectIndexType.NON_UNIQUE) {
         public void set(ProblemAnalysisTagUrl obj, String value) { obj.setTag(value); }
         public String get(ProblemAnalysisTagUrl obj) { return obj.getTag(); }
     };
@@ -32,7 +32,10 @@ public class ProblemAnalysisTagUrl implements IModelObject<ProblemAnalysisTagUrl
     public static final ModelObjectSchema<ProblemAnalysisTagUrl> SCHEMA_V0 = new ModelObjectSchema<ProblemAnalysisTagUrl>("problem_analysis_tag_url")
             .add(PROBLEM_ID)
             .add(TAG)
-            .add(URL);
+            .add(URL).addIndex(new ModelObjectIndex<ProblemAnalysisTagUrl>(ModelObjectIndexType.UNIQUE)
+                    .addField(PROBLEM_ID)
+                    .addField(TAG)
+                    );
     
     /**
      * Description of fields (current schema version).

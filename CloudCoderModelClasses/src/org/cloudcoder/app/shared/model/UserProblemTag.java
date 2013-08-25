@@ -17,7 +17,7 @@ public class UserProblemTag implements IModelObject<UserProblemTag>
         public Integer get(UserProblemTag obj) { return obj.getProblemId(); }
     };
     public static final ModelObjectField<UserProblemTag, String> TAG=
-            new ModelObjectField<UserProblemTag, String>("tag", String.class, 256, ModelObjectIndexType.NON_UNIQUE) {
+            new ModelObjectField<UserProblemTag, String>("tag", String.class, 128, ModelObjectIndexType.NON_UNIQUE) {
         public void set(UserProblemTag obj, String value) { obj.setTag(value); }
         public String get(UserProblemTag obj) { return obj.getTag(); }
     };
@@ -25,7 +25,11 @@ public class UserProblemTag implements IModelObject<UserProblemTag>
     public static final ModelObjectSchema<UserProblemTag> SCHEMA_V0 = new ModelObjectSchema<UserProblemTag>("user_problem_tag")
             .add(USER_ID)
             .add(PROBLEM_ID)
-            .add(TAG);
+            .add(TAG).addIndex(new ModelObjectIndex<UserProblemTag>(ModelObjectIndexType.UNIQUE)
+                    .addField(USER_ID)
+                    .addField(PROBLEM_ID)
+                    .addField(TAG)
+                    );
     
     /**
      * Description of fields (current schema version).
