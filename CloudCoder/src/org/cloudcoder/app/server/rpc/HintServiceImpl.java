@@ -21,6 +21,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -39,6 +44,10 @@ import org.cloudcoder.app.shared.model.Problem;
 import org.cloudcoder.app.shared.model.ProblemAnalysisTagUrl;
 import org.cloudcoder.app.shared.model.User;
 import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+import org.json.simple.parser.ContainerFactory;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,9 +102,21 @@ public class HintServiceImpl extends RemoteServiceServlet implements HintService
 
                 if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
                     System.out.println("Success!");
+                    JSONParser parser = new JSONParser();
+                    ContainerFactory containerFactory = new ContainerFactory(){
+                      public List<String> creatArrayContainer() {
+                        return new LinkedList<String>();
+                      }
+                      public Map<String,String> createObjectContainer() {
+                        return new LinkedHashMap<String,String>();
+                      }
+                    };
+                    Map<String,String> json = (Map<String,String>)parser.parse(builder.toString(), containerFactory);
+                    String hintText=(String)json.get("hint");
+
                     results[i]=new Hint();
                     results[i].setHintTag(analysis.getTag());
-                    results[i].setHintText(builder.toString());
+                    results[i].setHintText(hintText);
                 } else if (statusLine.getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
                     logger.error("Web Service hint failure: Unauthorized HTTP access to "+analysis.getAnalysisUrl());
                 } else {
@@ -103,6 +124,8 @@ public class HintServiceImpl extends RemoteServiceServlet implements HintService
                 }
             } catch (IOException e) {
                 logger.error("Unable to get hint for "+analysis.getTag()+" from "+analysis.getAnalysisUrl(), e);
+            } catch (ParseException e) {
+                logger.error("Unable to decode JSON response from "+analysis.getAnalysisUrl());
             } finally {
                 client.getConnectionManager().shutdown();
             }

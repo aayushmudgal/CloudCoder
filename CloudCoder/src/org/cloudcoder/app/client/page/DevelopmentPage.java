@@ -258,6 +258,11 @@ public class DevelopmentPage extends CloudCoderPage {
 		        resultsTabPanelWidgetList.remove(i);
 		    }
 		    for (Hint hint : hints) {
+		        if (hint==null) {
+		            // if an error occurred for some hints, the result
+		            // will be null, so we have to check
+		            continue;
+		        }
 		        // TODO encode whether hints are plain text or HTML
 		        // Currently we assume plain text
 		        HintPanel panel=new HintPanel(SafeHtmlUtils.fromString(hint.getHintText()));

@@ -143,17 +143,17 @@ public class GetCoursesAndProblemsServiceImpl extends RemoteServiceServlet
 		return resultList.toArray(new Problem[resultList.size()]);
 	}
 	
-	public Problem[] getProblemsForUser(Course course,int userId) throws CloudCoderAuthenticationException {
-		// Make sure user is authenticated
-		User user = Database.getInstance().getUserGivenId(userId);
-		
-		List<Problem> resultList = Database.getInstance().getProblemsInCourse(user, course).getProblemList();
-		for (Problem p : resultList) {
-			logger.warn(p.getTestname() + " - " + p.getBriefDescription());
-		}
-		
-		return resultList.toArray(new Problem[resultList.size()]);
-	}
+//	public Problem[] getProblemsForUser(Course course,int userId) throws CloudCoderAuthenticationException {
+//		// Make sure user is authenticated
+//		User user = Database.getInstance().getUserGivenId(userId);
+//		
+//		List<Problem> resultList = Database.getInstance().getProblemsInCourse(user, course).getProblemList();
+//		for (Problem p : resultList) {
+//			logger.warn(p.getTestname() + " - " + p.getBriefDescription());
+//		}
+//		
+//		return resultList.toArray(new Problem[resultList.size()]);
+//	}
 	
 	/* (non-Javadoc)
 	 * @see org.cloudcoder.app.client.rpc.GetCoursesAndProblemsService#getProblemAndSubscriptionReceipts(org.cloudcoder.app.shared.model.Course)
