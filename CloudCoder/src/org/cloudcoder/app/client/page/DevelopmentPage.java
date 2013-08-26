@@ -66,20 +66,16 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.LayoutPanel;
-import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
-import com.google.gwt.user.client.ui.Widget;
 
 import edu.ycp.cs.dh.acegwt.client.ace.AceAnnotationType;
 import edu.ycp.cs.dh.acegwt.client.ace.AceEditor;
@@ -372,9 +368,6 @@ public class DevelopmentPage extends CloudCoderPage {
 			
 			User user=getSession().get(User.class);
 			
-            // Requires changes to IDatabase, JDBCDatabase, and creation of a persist.txn
-            // These should be looked up during activate() and stored in the session
-            // XXX should change to ProblemAnalysisTagUrl[]?
 			getSession().add(HintState.WAITING);
 			RPC.hintService.getProblemAnalyses(user.getId(), problem.getProblemId(), new AsyncCallback<ProblemAnalysisTagUrl[]>() {
                 @Override
@@ -384,18 +377,19 @@ public class DevelopmentPage extends CloudCoderPage {
                 }
                 @Override
                 public void onSuccess(ProblemAnalysisTagUrl[] result) {
-                    // Add to the session
-                    getSession().add(result);
                     GWT.log("on sucess callback received "+result.length+" analyses to be run");
-                    getSession().add(HintState.ENABLED);
-                }
-			});
-			
-			// Add hint-handler, if the tags match up for us to do so
-			devActionsPanel.setHintHandler(new Runnable() {
-                @Override
-                public void run() {
-                    doHint();
+                    if (result!=null && result.length>0) {
+                        getSession().add(result);
+                     // Add hint-handler, if the tags match up for us to do so
+                        devActionsPanel.setHintHandler(new Runnable() {
+                            @Override
+                            public void run() {
+                                doHint();
+                            }
+                        });
+                        getSession().add(HintState.ENABLED);
+                        devActionsPanel.enableHints();
+                    }
                 }
             });
 			

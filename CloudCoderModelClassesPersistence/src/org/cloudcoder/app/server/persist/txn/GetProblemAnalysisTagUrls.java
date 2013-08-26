@@ -70,6 +70,7 @@ public class GetProblemAnalysisTagUrls extends AbstractDatabaseRunnableNoAuthExc
                         " and p.problem_id = ? " +
                         " and uc.user_id = ? " +
                         " and p.course_id = uc.course_id " +
+                        " and pa.problem_id = p.problem_id " +
                         " and pa.tag = uc.tag ");
 
         stmt.setInt(1, problemId);

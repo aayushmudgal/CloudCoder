@@ -31,14 +31,11 @@ import com.google.gwt.user.client.ui.ResizeComposite;
  * @author David Hovemeyer
  */
 public class DevActionsPanel extends ResizeComposite {
-	/**
-	 * 
-	 */
+	
 	private static final double BUTTON_HEIGHT_PX = 32.0;
-	/**
-	 * 
-	 */
 	private static final double BUTTON_WIDTH_PX = 120.0;
+
+	private LayoutPanel layoutPanel;
 	private Runnable submitHandler;
 	private Runnable resetHandler;
 	// Default handler informs user that hints are not enabled
@@ -52,11 +49,29 @@ public class DevActionsPanel extends ResizeComposite {
     };
 	private Button hintButton;
 	
+	public void enableHints() {
+	    hintButton = new Button("Hint please!");
+        // initially the hint button is disabled, since not all exercises have hints enables
+        hintButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (hintHandler != null) {
+                    hintHandler.run();
+                } else {
+                    hintButton.setEnabled(false);
+                }
+            }
+        });
+        layoutPanel.add(hintButton);
+        layoutPanel.setWidgetRightWidth(hintButton, 0.0, Unit.PX, BUTTON_WIDTH_PX, Unit.PX);
+        layoutPanel.setWidgetBottomHeight(hintButton, 10.0 + BUTTON_HEIGHT_PX + 10.0, Unit.PX, BUTTON_HEIGHT_PX, Unit.PX);
+	}
+	
 	/**
 	 * Constructor.
 	 */
 	public DevActionsPanel() {
-		LayoutPanel layoutPanel = new LayoutPanel();
+		layoutPanel = new LayoutPanel();
 		
 		Button submitButton = new Button("Submit!");
 		submitButton.setStylePrimaryName("cc-emphButton");
@@ -73,20 +88,6 @@ public class DevActionsPanel extends ResizeComposite {
 		layoutPanel.setWidgetRightWidth(submitButton, 0.0, Unit.PX, BUTTON_WIDTH_PX, Unit.PX);
 		layoutPanel.setWidgetBottomHeight(submitButton, 10.0, Unit.PX, BUTTON_HEIGHT_PX, Unit.PX);
 		
-		hintButton = new Button("Hint please!");
-		// initially the hint button is disabled, since not all exercises have hints enables
-		hintButton.setEnabled(false);
-		hintButton.addClickHandler(new ClickHandler() {
-		    @Override
-		    public void onClick(ClickEvent event) {
-		        if (hintHandler != null) {
-		            hintHandler.run();
-		        }
-		    }
-		});
-		layoutPanel.add(hintButton);
-		layoutPanel.setWidgetRightWidth(hintButton, 0.0, Unit.PX, BUTTON_WIDTH_PX, Unit.PX);
-		layoutPanel.setWidgetBottomHeight(hintButton, 10.0 + BUTTON_HEIGHT_PX + 10.0, Unit.PX, BUTTON_HEIGHT_PX, Unit.PX);
 		
 		Button resetButton = new Button("Reset");
 		resetButton.addClickHandler(new ClickHandler() {
@@ -113,7 +114,6 @@ public class DevActionsPanel extends ResizeComposite {
 	 */
 	public void setSubmitHandler(Runnable submitHandler) {
 		this.submitHandler = submitHandler;
-		hintButton.setEnabled(true);
 	}
 	
 	/**
@@ -132,5 +132,6 @@ public class DevActionsPanel extends ResizeComposite {
 	 */
 	public void setHintHandler(Runnable hintHandler) {
 	    this.hintHandler=hintHandler;
+	    enableHints();
 	}
 }
