@@ -1,7 +1,6 @@
 // CloudCoder - a web-based pedagogical programming environment
 // Copyright (C) 2011-2013, Jaime Spacco <jspacco@knox.edu>
 // Copyright (C) 2011-2013, David H. Hovemeyer <david.hovemeyer@gmail.com>
-// Copyright (C) 2013, York College of Pennsylvania
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -16,28 +15,27 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package org.cloudcoder.app.client.rpc;
+package org.cloudcoder.app.server.login;
 
-import org.cloudcoder.app.shared.model.Activity;
-import org.cloudcoder.app.shared.model.LoginSpec;
-import org.cloudcoder.app.shared.model.User;
+import javax.servlet.http.HttpServletRequest;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
-
-public interface LoginServiceAsync {
-
-	void getLoginSpec(AsyncCallback<LoginSpec> callback);
-
-	void login(String userName, String password, AsyncCallback<User> callback);
-
-	void logout(AsyncCallback<Void> callback);
-
-	void getUser(AsyncCallback<User> callback);
-
-	void getActivity(AsyncCallback<Activity> callback);
-
-	void setActivity(Activity activity, AsyncCallback<Void> callback);
-
-	void getInitErrorList(AsyncCallback<String[]> callback);
+/**
+ * Abstract base class for {@link ILoginProvider} implementations that
+ * do require username and password, and do not support preauthorized
+ * logins.
+ * 
+ * @author David Hovemeyer
+ */
+public abstract class AbstractLoginProvider implements ILoginProvider {
+	
+	@Override
+	public boolean isUsernamePasswordRequired() {
+		return true;
+	}
+	
+	@Override
+	public String getPreAuthorizedUsername(HttpServletRequest request) {
+		throw new IllegalStateException("Preauthorized username not supported by " + DatabaseLoginProvider.class.getSimpleName());
+	}
 
 }

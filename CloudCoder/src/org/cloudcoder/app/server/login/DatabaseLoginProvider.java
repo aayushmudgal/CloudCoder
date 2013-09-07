@@ -16,28 +16,25 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package org.cloudcoder.app.client.rpc;
+package org.cloudcoder.app.server.login;
 
-import org.cloudcoder.app.shared.model.Activity;
-import org.cloudcoder.app.shared.model.LoginSpec;
+import javax.servlet.http.HttpServletRequest;
+
+import org.cloudcoder.app.server.persist.Database;
 import org.cloudcoder.app.shared.model.User;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
+/**
+ * Implementation of {@link ILoginProvider} that compares the username and
+ * password against the user account data stored in the database.
+ * 
+ * @author David Hovemeyer
+ */
+public class DatabaseLoginProvider extends AbstractLoginProvider {
 
-public interface LoginServiceAsync {
-
-	void getLoginSpec(AsyncCallback<LoginSpec> callback);
-
-	void login(String userName, String password, AsyncCallback<User> callback);
-
-	void logout(AsyncCallback<Void> callback);
-
-	void getUser(AsyncCallback<User> callback);
-
-	void getActivity(AsyncCallback<Activity> callback);
-
-	void setActivity(Activity activity, AsyncCallback<Void> callback);
-
-	void getInitErrorList(AsyncCallback<String[]> callback);
+	@Override
+	public User login(String username, String password, HttpServletRequest request) {
+		User user = Database.getInstance().authenticateUser(username, password);
+		return user;
+	}
 
 }

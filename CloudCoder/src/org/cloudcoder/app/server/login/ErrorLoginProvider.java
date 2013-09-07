@@ -16,28 +16,25 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package org.cloudcoder.app.client.rpc;
+package org.cloudcoder.app.server.login;
 
-import org.cloudcoder.app.shared.model.Activity;
-import org.cloudcoder.app.shared.model.LoginSpec;
+import javax.servlet.http.HttpServletRequest;
+
+import org.cloudcoder.app.server.persist.PersistenceException;
 import org.cloudcoder.app.shared.model.User;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
+/**
+ * Implementation of {@link ILoginProvider} that always throws
+ * an exception.  This provider is used only if the cloudcoder
+ * configuration does not specify a valid provider type.
+ * 
+ * @author David Hovemeyer
+ */
+public class ErrorLoginProvider extends AbstractLoginProvider {
 
-public interface LoginServiceAsync {
-
-	void getLoginSpec(AsyncCallback<LoginSpec> callback);
-
-	void login(String userName, String password, AsyncCallback<User> callback);
-
-	void logout(AsyncCallback<Void> callback);
-
-	void getUser(AsyncCallback<User> callback);
-
-	void getActivity(AsyncCallback<Activity> callback);
-
-	void setActivity(Activity activity, AsyncCallback<Void> callback);
-
-	void getInitErrorList(AsyncCallback<String[]> callback);
+	@Override
+	public User login(String username, String password, HttpServletRequest request) {
+		throw new PersistenceException("No login provider is configured");
+	}
 
 }
