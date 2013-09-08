@@ -104,6 +104,7 @@ public class TestPythonFunctionBuildStep implements IBuildStep {
 			//XXX: If we do that, we disallow global variables, which may be OK
 			StringBuilder test = new StringBuilder();
 			test.append("import sys\n");
+			test.append("import math\n");
 			test.append(programText+"\n");
 			programTextLength=StringUtil.countLines(programText);
 			int spaces=getIndentationIncrementFromPythonCode(programText);
@@ -116,16 +117,21 @@ public class TestPythonFunctionBuildStep implements IBuildStep {
 				 * 
 				 * def t0():
 				 *    _output=plus(2,3)
-				 *    _result=(5 == _output)
+				 *    _expected=<<test case output>>
+				 *    _result=(_expected == _output) if (type(_output) != float and type(_expected) != float) else (math.fabs(_output-_expected) < 0.00001) 
 				 *    return (_result, _output)
-				 *    
+				 * 
+				 * Note the check for floating point values: a delta-based comparison
+				 * is done rather than requiring strict equality.
+				 * 
 				 * We return a tuple with a boolean representing whether
 				 * the test case passed, and a String containing the 
 				 * actual output.  
 				 */
 				test.append(indent(spaces)+"_output="+problem.getTestname() + 
 				        "(" +t.getInput()+ ")\n");
-				test.append(indent(spaces)+"_result=("+t.getOutput()+" == _output)\n");
+				test.append(indent(spaces)+"_expected=" + t.getOutput() + "\n");
+				test.append(indent(spaces)+"_result=(_expected == _output) if (type(_output) != float and type(_expected) != float) else (math.fabs(_output-_expected) < 0.00001)\n");
 				test.append(indent(spaces)+"return (_result, _output)\n");
 			}
 			String result=test.toString();
@@ -164,7 +170,7 @@ public class TestPythonFunctionBuildStep implements IBuildStep {
 			final byte[] sBytes=s.getBytes();
 
 			//Check if the Python code is syntactically correct
-			CompilationResult compres=compilePythonScript(s);
+			CompilationResult compres=compilePythonScript(problem, s);
 			if (compres.getOutcome()!=CompilationOutcome.SUCCESS) {
 				compres.adjustDiagnosticLineNumbers(prologueLength, epilogueLength);
 				return new SubmissionResult(compres);
@@ -216,11 +222,25 @@ public class TestPythonFunctionBuildStep implements IBuildStep {
 		/**
 		 * @param programText
 		 */
-		public static CompilationResult compilePythonScript(final String programText) {
+		public CompilationResult compilePythonScript(Problem problem, final String programText) {
 			try {
 			    logger.info("\n"+programText);
 				PythonInterpreter terp=new PythonInterpreter();
 				terp.execfile(new ByteArrayInputStream(programText.getBytes()));
+				
+				// Check to see if the test code actually defines the required
+				// function.  If it doesn't, report this as a failed compilation
+				// (it isn't really, but attempting to execute any of the
+				// test methods will accomplish nothing useful.)
+				PyFunction func = (PyFunction)terp.get(problem.getTestname(), PyFunction.class);
+				if (func == null) {
+					CompilationResult compRes = new CompilationResult(CompilationOutcome.FAILURE);
+					CompilerDiagnostic diag = new CompilerDiagnostic(prologueLength+1, prologueLength+1, 1, 1, "Required function " + problem.getTestname() + " was not defined");
+					compRes.setCompilerDiagnosticList(new CompilerDiagnostic[]{ diag });
+					return compRes;
+				}
+
+				// Compilation successful, we should be ready to run the tests
 				return new CompilationResult(CompilationOutcome.SUCCESS);
 			} catch (PySyntaxError e) {
 
@@ -308,7 +328,11 @@ public class TestPythonFunctionBuildStep implements IBuildStep {
 					return new TestResult(TestOutcome.FAILED_BY_SECURITY_MANAGER, "Failed for input=" + testCase.getInput() + ", expected=" + testCase.getOutput());
 				}
 				logger.warn("Exception type was "+e.getClass());
-				return new TestResult(TestOutcome.FAILED_WITH_EXCEPTION, e.getMessage(), "stdout", "stderr");
+				String msg = e.getMessage();
+				if (msg == null || msg.trim().equals("")) {
+					msg = "Exception running test: " + e.getClass().getName();
+				}
+				return new TestResult(TestOutcome.FAILED_WITH_EXCEPTION, msg, "stdout", "stderr");
 			}
 		}
 	}
