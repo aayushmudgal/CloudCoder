@@ -18,6 +18,7 @@ http://repo1.maven.org/maven2/commons-io/commons-io/2.1/commons-io-2.1.jar
   CloudCoder/war/WEB-INF/lib/commons-io-2.1.jar
   CloudCoderLoadTester/lib/commons-io-2.1.jar
   CloudCoderLogging/lib/commons-io-2.1.jar
+  CloudCoderAnalysis/lib/commons-io-2.1.jar
 http://search.maven.org/remotecontent?filepath=org/python/jython/2.5.3/jython-2.5.3.jar
   CloudCoderBuilder2/lib/jython-2.5.3.jar
 https://s3.amazonaws.com/org.cloudcoder.daemon.binaries/daemon-0.5.jar
@@ -123,3 +124,5 @@ http://repo1.maven.org/maven2/com/mchange/mchange-commons-java/0.2.3.4/mchange-c
   CloudCoderRepository/war/WEB-INF/lib/mchange-commons-java-0.2.3.4.jar
 https://java-diff-utils.googlecode.com/files/diffutils-1.2.1.jar
   CloudCoderAnalysis/lib/diffutils-1.2.1.jar
+https://s3.amazonaws.com/cloudcoder/eclipse-jdt.jar
+  CloudCoderAnalysis/lib/eclipse-jdt.jar
