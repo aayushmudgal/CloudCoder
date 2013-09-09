@@ -2,3 +2,5 @@ bin
 /log
 /output
 /lib/diffutils-1.2.1.jar
+/lib/commons-io-2.1.jar
+/lib/eclipse-jdt.jar
