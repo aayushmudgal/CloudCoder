@@ -32,6 +32,7 @@ import org.cloudcoder.app.shared.model.CourseRegistration;
 import org.cloudcoder.app.shared.model.CourseRegistrationList;
 import org.cloudcoder.app.shared.model.CourseRegistrationType;
 import org.cloudcoder.app.shared.model.EditedUser;
+import org.cloudcoder.app.shared.model.Hint;
 import org.cloudcoder.app.shared.model.IModelObject;
 import org.cloudcoder.app.shared.model.Module;
 import org.cloudcoder.app.shared.model.NamedTestResult;
@@ -672,6 +673,16 @@ public interface IDatabase {
      * @return array of {@link ProblemAnalysisTagUrl}s that apply to this user, problem, or course.
      */
     public ProblemAnalysisTagUrl[] lookupProblemAnalysisTagUrls(Integer userId, Integer problemId);
+
+    /**
+     * Store an event in the database indicating that the given student requested a hint or hints
+     * on the given problem.
+     * 
+     * @param user The user who requested a hint or hints
+     * @param problem The problem for which the user requested a hint or hints
+     * @param hints The hint or hints that were provided for the given user on the given problem
+     */
+    public void storeHintRequest(User user, Problem problem, Hint[] hints);
         
 
 }

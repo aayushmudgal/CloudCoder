@@ -78,6 +78,7 @@ import org.cloudcoder.app.server.persist.txn.ReplaceTestResults;
 import org.cloudcoder.app.server.persist.txn.SearchRepositoryExercises;
 import org.cloudcoder.app.server.persist.txn.SetModuleForProblem;
 import org.cloudcoder.app.server.persist.txn.StoreChanges;
+import org.cloudcoder.app.server.persist.txn.StoreHintRequest;
 import org.cloudcoder.app.server.persist.txn.StoreProblemAndTestCaseList;
 import org.cloudcoder.app.server.persist.txn.StoreRepoProblemAndTestCaseList;
 import org.cloudcoder.app.server.persist.txn.StoreSubmissionReceipt;
@@ -94,6 +95,7 @@ import org.cloudcoder.app.shared.model.Course;
 import org.cloudcoder.app.shared.model.CourseRegistrationList;
 import org.cloudcoder.app.shared.model.CourseRegistrationType;
 import org.cloudcoder.app.shared.model.EditedUser;
+import org.cloudcoder.app.shared.model.Hint;
 import org.cloudcoder.app.shared.model.IModelObject;
 import org.cloudcoder.app.shared.model.Module;
 import org.cloudcoder.app.shared.model.NamedTestResult;
@@ -576,6 +578,12 @@ public class JDBCDatabase implements IDatabase {
     public ProblemAnalysisTagUrl[] lookupProblemAnalysisTagUrls(Integer userId,Integer problemId)
     {
         return databaseRun(new GetProblemAnalysisTagUrls(userId, problemId));
+    }
+
+    @Override
+    public void storeHintRequest(User user, Problem problem, Hint[] hints)
+    {
+        databaseRun(new StoreHintRequest(user, problem, hints)); 
     }
 	
 }
