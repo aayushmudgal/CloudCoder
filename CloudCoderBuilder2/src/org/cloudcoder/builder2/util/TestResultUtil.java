@@ -162,6 +162,19 @@ public class TestResultUtil {
 	}
 
 	/**
+	 * Create a generic {@link TestResult} for a passed test
+	 * where a result (output) value was generated.
+	 * 
+	 * @param problem   the {@link Problem}
+	 * @param testCase  the {@link TestCase}
+	 * @param output    the result value
+	 * @return the {@link TestResult}
+	 */
+	public static TestResult createResultForPassedTest(Problem problem, TestCase testCase, String output) {
+		return createTestResult(null, problem, TestOutcome.PASSED, testCase, output);
+	}
+	
+	/**
 	 * Create a generic {@link TestResult} for a failed test.
 	 * This method assumes that we don't have the actual output
 	 * of the submitted code (i.e. the expected result was 5
@@ -234,10 +247,13 @@ public class TestResultUtil {
 		StringBuilder buf = new StringBuilder();
 		buf.append(outcome.getShortMessage());
 
+		String input = testCase.getInput();
+		String expected = testCase.getOutput();
+
 		if (!testCase.isSecret()) {
-			buf.append(" for input (" + testCase.getInput() + ")");
+			buf.append(" for input (" + input + ")");
 			if (problem.getProblemType().isOutputLiteral()) {
-				buf.append(", expected output=" + testCase.getOutput());
+				buf.append(", expected output=" + expected);
 				if (output!=null && outcome!=TestOutcome.PASSED) {
 				    // include the actual output, if we have it
 				    buf.append(", actual output="+output);
@@ -249,10 +265,21 @@ public class TestResultUtil {
 		
 		ProblemType type=problem.getProblemType();
 		if (type.isOutputLiteral() && !testCase.isSecret()) {
-		    testResult.setInput(testCase.getInput());
-		    testResult.setExpectedOutput(testCase.getOutput());
-		    // Important: at the database level, actual output cannot be null
-		    testResult.setActualOutput(output != null ? output : "");
+		    testResult.setInput(input);
+		    testResult.setExpectedOutput(expected);
+		    
+		    String actual = output;
+		    
+		    if (actual == null) {
+			    // Important: at the database level, actual output cannot be null
+		    	actual = "";
+		    } else {
+			    // Depending on the problem type, add quoting to the
+			    // actual output.  The expected output is passed in
+		    	// order to make the quoting consistent.
+		    	actual = quote(problem.getProblemType(), expected, actual);
+		    }
+			testResult.setActualOutput(actual);
 		}
 
 		if (p != null) {
@@ -274,7 +301,19 @@ public class TestResultUtil {
 		return testResult;
 	}
 
-    public static TestResult createResultForFailedWithExceptionTest(Problem problem, 
+	private static String quote(ProblemType problemType, String input, String actual) {
+		if (problemType == ProblemType.PYTHON_FUNCTION) {
+			// FIXME: it would be nice to quote metacharacters here
+			if (input.startsWith("'")) {
+				actual = "'" + actual + "'";
+			} else if (input.startsWith("\"")) {
+				actual = "\"" + actual + "\"";
+			}
+		}
+		return actual;
+	}
+
+	public static TestResult createResultForFailedWithExceptionTest(Problem problem, 
         TestCase testCase, Throwable exception)
     {
         //TODO: We can parse the stack trace to get out specific line numbers

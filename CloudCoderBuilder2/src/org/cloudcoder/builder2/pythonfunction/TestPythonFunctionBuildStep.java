@@ -256,9 +256,12 @@ public class TestPythonFunctionBuildStep implements IBuildStep {
 				//compres.setException(e);
 				return compres;
 			} catch (PyException e) {
-				logger.warn("Unexpected PyException (probably compilation failure): ");
+				logger.warn("Unexpected PyException (probably compilation failure)", e);
 				CompilationResult compres=new CompilationResult(CompilationOutcome.UNEXPECTED_COMPILER_ERROR);
 				//compres.setException(e);
+				String message = getExceptionMessage(e);
+				CompilerDiagnostic diag = new CompilerDiagnostic(1, 1, 1, 1, message);
+				compres.setCompilerDiagnosticList(new CompilerDiagnostic[]{diag});
 				return compres;
 			}
 		}
@@ -317,7 +320,7 @@ public class TestPythonFunctionBuildStep implements IBuildStep {
 			    String output=tuple.__getitem__(1).toString();
 			    logger.trace("Actual output of code submitted for method: "+output);
 				if (result!=null && result.equals(True)) {
-				    return TestResultUtil.createResultForPassedTest(problem, testCase);
+				    return TestResultUtil.createResultForPassedTest(problem, testCase, output);
 				} else {
 					logger.warn("Test case failed result  "+tuple.toString());
 					// Message returned to user is created here!

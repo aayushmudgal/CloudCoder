@@ -23,10 +23,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
+import java.util.Properties;
 
 import org.cloudcoder.builder2.ccompiler.Compiler;
 import org.cloudcoder.builder2.util.DeleteDirectoryRecursively;
 import org.cloudcoder.builder2.util.FileUtil;
+import org.cloudcoder.builder2.util.SingletonHolder;
 import org.cloudcoder.daemon.IOUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,39 +45,52 @@ import org.slf4j.LoggerFactory;
 public class EasySandboxSharedLibrary {
 	private static Logger logger = LoggerFactory.getLogger(EasySandboxSharedLibrary.class);
 	
-	private static EasySandboxSharedLibrary instance = new EasySandboxSharedLibrary();
+	private static SingletonHolder<EasySandboxSharedLibrary, Properties> holder = new SingletonHolder<EasySandboxSharedLibrary, Properties>() {
+		@Override
+		protected EasySandboxSharedLibrary onCreate(Properties arg) {
+			return new EasySandboxSharedLibrary(arg);
+		}
+	};
 	
 	/**
 	 * Get the singleton instance.
 	 * 
 	 * @return the singleton instance
 	 */
-	public static EasySandboxSharedLibrary getInstance() {
-		return instance;
-	}
-	
-	private File tempDir;
-	private String sharedLibraryPath;
-	
-	private EasySandboxSharedLibrary() {
-		try {
-			build();
-		} catch (IOException e) {
-			logger.warn("Could not build EasySandbox shared library", e);
-		}
+	public static EasySandboxSharedLibrary getInstance(Properties config) {
+		return holder.get(config);
 	}
 	
 	/**
-	 * Compile the EasySandbox shared library.
+	 * Check whether or not the singleton instance was created.
 	 * 
-	 * @throws IOException if an error occurs
+	 * @return true if the singleton instance was created, false if not
 	 */
-	private void build() throws IOException {
+	public static boolean isCreated() {
+		return holder.isCreated();
+	}
+	
+	// Fields
+	private File tempDir;
+	private String sharedLibraryPath;
+	
+	/**
+	 * Constructor.
+	 */
+	private EasySandboxSharedLibrary(Properties config) {
+		try {
+			build(config);
+		} catch (Exception e) {
+			logger.error("Could not build EasySandbox shared library", e);
+		}
+	}
+	
+	private void build(Properties config) throws IOException {
 		// Get source code for the EasySandbox source files
 		String source1 = sourceResourceToString("EasySandbox.c");
 		String source2 = sourceResourceToString("malloc.c");
 		
-		this.tempDir = FileUtil.makeTempDir();
+		this.tempDir = FileUtil.makeTempDir(config);
 		
 		// Compile the code and link it into a shared library
 		Compiler compiler = new Compiler(tempDir, "EasySandbox.so");
@@ -87,7 +102,7 @@ public class EasySandboxSharedLibrary {
 		
 		if (!compiler.compile()) {
 			for (String err : compiler.getCompilerOutput()) {
-				System.err.println(err);
+				logger.error("Compile error: {}", err);
 			}
 			throw new IOException("Error compiling EasySandbox shared library");
 		}
@@ -125,4 +140,5 @@ public class EasySandboxSharedLibrary {
 			IOUtil.closeQuietly(in);
 		}
 	}
+	
 }
