@@ -259,10 +259,9 @@ public class DevelopmentPage extends CloudCoderPage {
 		            // will be null, so we have to check
 		            continue;
 		        }
-		        // TODO encode whether hints are plain text or HTML
-		        // Currently we assume plain text
-		        HintPanel panel=new HintPanel(SafeHtmlUtils.fromString(hint.getHintText()));
-		        //HintPanel panel=new HintPanel(SafeHtmlUtils.fromTrustedString(hint.getHintText()));
+		        // XXX Assuming there are no vulnerabilities in the HTML hints
+		        // This is OK for now
+		        HintPanel panel=new HintPanel(SafeHtmlUtils.fromTrustedString(hint.getHintText()));
 		        panel.setTitle(hint.getHintTag());
 		        resultsTabPanel.add(panel, hint.getHintTag());
 		        resultsTabPanelWidgetList.add(panel);
