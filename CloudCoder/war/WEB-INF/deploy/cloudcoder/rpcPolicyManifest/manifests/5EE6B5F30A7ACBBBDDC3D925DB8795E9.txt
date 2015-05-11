@@ -1,0 +1,2 @@
+serviceClass: org.cloudcoder.app.client.rpc.ConfigurationSettingService
+path: 93E73FBC2C0319694E1A377966445D2C.gwt.rpc

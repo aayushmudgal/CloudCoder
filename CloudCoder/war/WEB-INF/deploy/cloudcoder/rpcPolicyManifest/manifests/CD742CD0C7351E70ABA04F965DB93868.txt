@@ -1,0 +1,2 @@
+serviceClass: org.cloudcoder.app.client.rpc.HintService
+path: 9CCFF5362C8935D03C2FBFCC0A301280.gwt.rpc

@@ -1,0 +1,10 @@
+# Module cloudcoder
+# RPC service class, partial path of RPC policy file
+org.cloudcoder.app.client.rpc.RunService, 7341448AF7D2EBCEA2B4128C279F6D5B.gwt.rpc
+org.cloudcoder.app.client.rpc.LoginService, 5A5A5F0D003D7BB2999D5D5CD580F270.gwt.rpc
+org.cloudcoder.app.client.rpc.ConfigurationSettingService, 93E73FBC2C0319694E1A377966445D2C.gwt.rpc
+org.cloudcoder.app.client.rpc.UserService, 9271F01C6130B5346810826A9A7CDE38.gwt.rpc
+org.cloudcoder.app.client.rpc.EditCodeService, 3F946EF2CDAF9B54DD544E242EDF2F54.gwt.rpc
+org.cloudcoder.app.client.rpc.HintService, 9CCFF5362C8935D03C2FBFCC0A301280.gwt.rpc
+org.cloudcoder.app.client.rpc.SubmitService, F455D4058DE74AC9A1DFBE7AB92E5EBB.gwt.rpc
+org.cloudcoder.app.client.rpc.GetCoursesAndProblemsService, 3A3055C759F6B2720ECDCF793900C7BE.gwt.rpc

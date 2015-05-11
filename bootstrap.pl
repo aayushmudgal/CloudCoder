@@ -57,17 +57,29 @@ GREET
 	
 	print "\nFirst, please enter some configuration information...\n\n";
 	
+	# # Get minimal required configuration information
+	# my $ccUser = ask("What username do you want for your CloudCoder account?");
+	# my $ccPasswd = ask("What password do you want for your CloudCoder account?");
+	# my $ccFirstName = ask("What is your first name?");
+	# my $ccLastName = ask("What is your last name?");
+	# my $ccEmail = ask("What is your email address?");
+	# my $ccWebsite = ask("What is the URL of your personal website?");
+	# my $ccInstitutionName = ask("What is the name of your institution?");
+	# my $ccMysqlRootPasswd = ask("What password do you want for the MySQL root user?");
+	# my $ccMysqlCCPasswd = ask("What password do you want for the MySQL cloudcoder user?");
+	# my $ccHostname = ask("What is the hostname of this server?");
+
 	# Get minimal required configuration information
-	my $ccUser = ask("What username do you want for your CloudCoder account?");
-	my $ccPasswd = ask("What password do you want for your CloudCoder account?");
-	my $ccFirstName = ask("What is your first name?");
-	my $ccLastName = ask("What is your last name?");
-	my $ccEmail = ask("What is your email address?");
-	my $ccWebsite = ask("What is the URL of your personal website?");
-	my $ccInstitutionName = ask("What is the name of your institution?");
-	my $ccMysqlRootPasswd = ask("What password do you want for the MySQL root user?");
-	my $ccMysqlCCPasswd = ask("What password do you want for the MySQL cloudcoder user?");
-	my $ccHostname = ask("What is the hostname of this server?");
+	my $ccUser = "mudgal"; # ask("What username do you want for your CloudCoder account?");
+	my $ccPasswd = "mudgal"; # ask("What password do you want for your CloudCoder account?");
+	my $ccFirstName = "Aayush"; #ask("What is your first name?");
+	my $ccLastName = "Mudgal"; #ask("What is your last name?");
+	my $ccEmail = "mudgal.iitk.ac.in";#ask("What is your email address?");
+	my $ccWebsite = "home.iitk.ac.in/~mudgal"; #ask("What is the URL of your personal website?");
+	my $ccInstitutionName = "IITK"; # ask("What is the name of your institution?");
+	my $ccMysqlRootPasswd = "root"; #ask("What password do you want for the MySQL root user?");
+	my $ccMysqlCCPasswd = "ccuserpassword"; #ask("What password do you want for the MySQL cloudcoder user?");
+	my $ccHostname = "localhost"; #ask("What is the hostname of this server?");		
 
 	print "\n";
 	my $startInstall = ask("Are you ready to start the installation? (yes/no)");
@@ -79,10 +91,10 @@ GREET
 	section("Installing required packages...");
 
 	# Run apt-get update so that repository metadata is current
-	RunAdmin(
-		env => { 'DEBIAN_FRONTEND' => 'noninteractive' },
-		cmd => ["apt-get", "update"]
-	);
+	# RunAdmin(
+	# 	env => { 'DEBIAN_FRONTEND' => 'noninteractive' },
+	# 	cmd => ["apt-get", "update"]
+	# );
 
 	# Determine which mysql-server version we will use
 	my $mysqlVersion = FindMysqlVersion();
@@ -105,21 +117,21 @@ GREET
 	# ----------------------------------------------------------------------
 	# Configure MySQL
 	# ----------------------------------------------------------------------
-	section("Configuring MySQL...");
-	print "Creating cloudcoder user...\n";
-	Run("mysql", "--user=root", "--pass=$ccMysqlRootPasswd",
-		"--execute=create user 'cloudcoder'\@'localhost' identified by '$ccMysqlCCPasswd'");
-	print "Granting permissions on cloudcoderdb to cloudcoder...\n";
-	Run("mysql", "--user=root", "--pass=$ccMysqlRootPasswd",
-		"--execute=grant all on cloudcoderdb.* to 'cloudcoder'\@'localhost'");
+	# section("Configuring MySQL...");
+	# print "Creating cloudcoder user...\n";
+	# Run("mysql", "--user=root", "--pass=$ccMysqlRootPasswd",
+	# 	"--execute=create user 'cloudcoder'\@'localhost' identified by '$ccMysqlCCPasswd'");
+	# print "Granting permissions on cloudcoderdb to cloudcoder...\n";
+	# Run("mysql", "--user=root", "--pass=$ccMysqlRootPasswd",
+	# 	"--execute=grant all on cloudcoderdb.* to 'cloudcoder'\@'localhost'");
 	
 	# ----------------------------------------------------------------------
 	# Create cloud user
 	# ----------------------------------------------------------------------
-	section("Creating cloud user account...");
-	RunAdmin(
-		cmd => [ 'adduser', '--disabled-password', '--home', '/home/cloud', '--gecos', '', 'cloud' ]
-	);
+	# section("Creating cloud user account...");
+	# RunAdmin(
+	# 	cmd => [ 'adduser', '--disabled-password', '--home', '/home/cloud', '--gecos', '', 'cloud' ]
+	# );
 
 	# ----------------------------------------------------------------------
 	# Configure apache2
@@ -138,45 +150,36 @@ GREET
 	# Continue as the cloud user to download and configure
 	# webapp and builder jarfiles.
 	# ----------------------------------------------------------------------
-	section("Continuing as cloud user...");
-	Run("cp", $program, "/tmp/bootstrap.pl");
-	Run("chmod", "a+x", "/tmp/bootstrap.pl");
-	RunAdmin(
-		asUser => 'cloud',
-		cmd => ["/tmp/bootstrap.pl", "step2",
-			"ccUser=$ccUser,ccPassword=$ccPasswd,ccFirstName=$ccFirstName," .
-			"ccLastName=$ccLastName,ccEmail=$ccEmail,ccWebsite=$ccWebsite," .
-			"ccInstitutionName=$ccInstitutionName," .
-			"ccMysqlCCPasswd=$ccMysqlCCPasswd,ccHostname=$ccHostname"]);
+	# section("Continuing as cloud user...");
+	# Run("cp", $program, "/tmp/bootstrap.pl");
+	# Run("chmod", "a+x", "/tmp/bootstrap.pl");
+	# RunAdmin(
+	# 	asUser => 'cloud',
+	# 	cmd => ["/tmp/bootstrap.pl", "step2",
+	# 		"ccUser=$ccUser,ccPassword=$ccPasswd,ccFirstName=$ccFirstName," .
+	# 		"ccLastName=$ccLastName,ccEmail=$ccEmail,ccWebsite=$ccWebsite," .
+	# 		"ccInstitutionName=$ccInstitutionName," .
+	# 		"ccMysqlCCPasswd=$ccMysqlCCPasswd,ccHostname=$ccHostname"]);
 
 	# ----------------------------------------------------------------------
 	# Copy the configured builder jarfile into the home directory of the current user.
 	# ----------------------------------------------------------------------
-	my $version = GetLatestVersion();
-	my $builderJar = "cloudcoderBuilder-v$version.jar";
-	my $home = $ENV{'HOME'};
-	my $user = $ENV{'USER'};
-	print "Copying configured builder jarfile into $home...\n";
-	RunAdmin(cmd => ["cp", "/home/cloud/webapp/$builderJar", $home]);
-	RunAdmin(cmd => ["chown", $user, "$builderJar"]);
+	# my $version = GetLatestVersion();
+	# my $builderJar = "cloudcoderBuilder-v$version.jar";
+	# my $home = $ENV{'HOME'};
+	# my $user = $ENV{'USER'};
+	# print "Copying configured builder jarfile into $home...\n";
+	# RunAdmin(cmd => ["cp", "/home/cloud/webapp/$builderJar", $home]);
+	# print "Home ...$home...\n";
+	# print "User ... $user .. \n";
+	# RunAdmin(cmd => ["chown", $user, "/home/cloud/webapp/$builderJar"]);
+	# RunAdmin(cmd => ["chown", $user, "$builderJar"]);
 
 	# ----------------------------------------------------------------------
 	# We're done!
 	# ----------------------------------------------------------------------
 	section("CloudCoder installation successful!");
-	print <<"SUCCESS";
-It looks like CloudCoder was installed successfully.
-
-You should be able to test your new installation by opening the
-following web page:
-
-  https://$ccHostname/cloudcoder
-
-Note that no builders are running, so you won't be able to
-test submissions yet.  The builder jar file ($builderJar)
-is in the $home directory: you will need to copy
-it to the server(s) which will be responsible for building
-and testing submissions.
+	print "SUCCESS   ###  ";
 SUCCESS
 }
 
@@ -208,68 +211,68 @@ sub Step2 {
 
 	# Download webapp and builder release jarfiles
 	section("Downloading $appJar and $builderJar...");
-	Run("wget", "$DOWNLOAD_SITE/$appJar");
-	Run("wget", "$DOWNLOAD_SITE/$builderJar");
+	# Run("wget", "$DOWNLOAD_SITE/$appJar");
+	# Run("wget", "$DOWNLOAD_SITE/$builderJar");
 
 	# ----------------------------------------------------------------------
 	# Configure webapp distribution jarfile with
 	# generated cloudcoder.properties and keystore
 	# ----------------------------------------------------------------------
-	section("Configuring $appJar and $builderJar...");
+# 	section("Configuring $appJar and $builderJar...");
 
-	# Generate cloudcoder.properties
-	print "Creating cloudcoder.properties...\n";
-	my $pfh = new FileHandle(">cloudcoder.properties");
-	my $ccMysqlCCPasswd = $props{ccMysqlCCPasswd};
-	my $ccHostname = $props{ccHostname};
-	print $pfh <<"ENDPROPERTIES";
-cloudcoder.db.user=cloudcoder
-cloudcoder.db.passwd=$ccMysqlCCPasswd
-cloudcoder.db.databaseName=cloudcoderdb
-cloudcoder.db.host=localhost
-cloudcoder.db.portStr=
-cloudcoder.login.service=database
-cloudcoder.submitsvc.oop.host=$ccHostname
-cloudcoder.submitsvc.oop.numThreads=2
-cloudcoder.submitsvc.oop.port=47374
-cloudcoder.submitsvc.oop.easysandbox.enable=true
-cloudcoder.submitsvc.oop.easysandbox.heapsize=8388608
-cloudcoder.submitsvc.ssl.cn=None
-cloudcoder.submitsvc.ssl.keystore=keystore.jks
-cloudcoder.submitsvc.ssl.keystore.password=changeit
-cloudcoder.webserver.port=8081
-cloudcoder.webserver.contextpath=/cloudcoder
-cloudcoder.webserver.localhostonly=true
-ENDPROPERTIES
-	$pfh->close();
+# 	# Generate cloudcoder.properties
+# 	print "Creating cloudcoder.properties...\n";
+# 	my $pfh = new FileHandle(">cloudcoder.properties");
+# 	my $ccMysqlCCPasswd = $props{ccMysqlCCPasswd};
+# 	my $ccHostname = $props{ccHostname};
+# 	print $pfh <<"ENDPROPERTIES";
+# cloudcoder.db.user=cloudcoder
+# cloudcoder.db.passwd=$ccMysqlCCPasswd
+# cloudcoder.db.databaseName=cloudcoderdb
+# cloudcoder.db.host=localhost
+# cloudcoder.db.portStr=
+# cloudcoder.login.service=database
+# cloudcoder.submitsvc.oop.host=$ccHostname
+# cloudcoder.submitsvc.oop.numThreads=2
+# cloudcoder.submitsvc.oop.port=47374
+# cloudcoder.submitsvc.oop.easysandbox.enable=true
+# cloudcoder.submitsvc.oop.easysandbox.heapsize=8388608
+# cloudcoder.submitsvc.ssl.cn=None
+# cloudcoder.submitsvc.ssl.keystore=keystore.jks
+# cloudcoder.submitsvc.ssl.keystore.password=changeit
+# cloudcoder.webserver.port=8081
+# cloudcoder.webserver.contextpath=/cloudcoder
+# cloudcoder.webserver.localhostonly=true
+# ENDPROPERTIES
+# 	$pfh->close();
 
-	# Create a keystore
-	print "Creating a keystore for communication between webapp and builder...\n";
-	Run('keytool', '-genkey', '-noprompt',
-		'-alias', 'cloudcoder',
-		'-storepass', 'changeit',
-		'-keystore', 'keystore.jks',
-		'-validity', '3600',
-		'-keypass', 'changeit',
-		'-dname', "CN=None, OU=None, L=None, ST=None, C=None");
+# 	# Create a keystore
+# 	print "Creating a keystore for communication between webapp and builder...\n";
+# 	Run('keytool', '-genkey', '-noprompt',
+# 		'-alias', 'cloudcoder',
+# 		'-storepass', 'changeit',
+# 		'-keystore', 'keystore.jks',
+# 		'-validity', '3600',
+# 		'-keypass', 'changeit',
+# 		'-dname', "CN=None, OU=None, L=None, ST=None, C=None");
 
-	# Configure webapp jarfile to use the generated cloudcoder.properties
-	# and keystore
-	print "Configuring $appJar...\n";
-	Run("java", "-jar", $appJar, "configure",
-		"--editJar=$appJar",
-		"--replace=cloudcoder.properties=cloudcoder.properties",
-		"--replace=war/WEB-INF/classes/keystore.jks=keystore.jks");
+# 	# Configure webapp jarfile to use the generated cloudcoder.properties
+# 	# and keystore
+# 	print "Configuring $appJar...\n";
+# 	Run("java", "-jar", $appJar, "configure",
+# 		"--editJar=$appJar",
+# 		"--replace=cloudcoder.properties=cloudcoder.properties",
+# 		"--replace=war/WEB-INF/classes/keystore.jks=keystore.jks");
 
-	# Configure builder jarfile to use the same cloudcoder.properties
-	# and keystore
-	print "Configuring $builderJar...\n";
-	Run("java", "-jar", $builderJar, "configure",
-		"--editJar=$builderJar",
-		"--replace=cloudcoder.properties=cloudcoder.properties",
-		"--replace=keystore.jks=keystore.jks");
+# 	# Configure builder jarfile to use the same cloudcoder.properties
+# 	# and keystore
+# 	print "Configuring $builderJar...\n";
+# 	Run("java", "-jar", $builderJar, "configure",
+# 		"--editJar=$builderJar",
+# 		"--replace=cloudcoder.properties=cloudcoder.properties",
+# 		"--replace=keystore.jks=keystore.jks");
 
-	Run('rm', '-f', 'cloudcoder.properties', 'keystore.jks');
+# 	Run('rm', '-f', 'cloudcoder.properties', 'keystore.jks');
 
 	# ----------------------------------------------------------------------
 	# Create the cloudcoderdb database
@@ -280,8 +283,8 @@ ENDPROPERTIES
 	# ----------------------------------------------------------------------
 	# Start the webapp!
 	# ----------------------------------------------------------------------
-	section("Starting the CloudCoder web application");
-	Run("java", "-jar", $appJar, "start");
+	# section("Starting the CloudCoder web application");
+	# Run("java", "-jar", $appJar, "start");
 	
 }
 

@@ -1,0 +1,2 @@
+serviceClass: org.cloudcoder.app.client.rpc.SubmitService
+path: F455D4058DE74AC9A1DFBE7AB92E5EBB.gwt.rpc

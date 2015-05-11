@@ -527,6 +527,90 @@ public class DevelopmentPage extends CloudCoderPage {
 			String text = aceEditor.getText();
 
 			doSubmitRPC(problem, text);
+			
+			// text compiled... now testing for any feedback if there... -> update in doSu
+
+			addSessionObject(StatusMessage.pending("Requesting a hint, please wait..."));
+		    
+// 		    // Get user and problem
+//             Problem problem = getSession().get(Problem.class);
+             User user=getSession().get(User.class);
+             GWT.log("username requesting hint: " +user.getUsername());
+            
+//             // Get the available analyses (hint generating web services) for this problem
+//             // and the given user
+             HintState hintMode=getSession().get(HintState.class);
+             GWT.log("hint state: "+hintMode);
+             ProblemAnalysisTagUrl[] analyses=getSession().get(ProblemAnalysisTagUrl[].class);
+             // if (hintMode==HintState.WAITING || hintMode==HintState.DISABLED ||
+             //         analyses==null || analyses.length==0)
+             // {
+             //     // OkDialogBox dialog=new OkDialogBox("Hints are disabled",
+             //     //         "Hints are disabled for this exercise, " +
+             //     //         "or there are not hints available");
+             //     // dialog.center();
+             //     // addSessionObject(StatusMessage.information("Hints not available for this exercise"));
+             //     return;
+             // }
+            for (ProblemAnalysisTagUrl p : analyses) {
+                GWT.log("Analysis enabled: "+p.getTag());
+            }
+            
+             // Get current text of code
+//             String text = aceEditor.getText();
+            
+             RPC.hintService.requestHint(problem, user, text, analyses, new AsyncCallback<Hint[]>() {
+                 @Override
+                 public void onFailure(Throwable caught) {
+                     if (caught instanceof CloudCoderAuthenticationException) {
+                         recoverFromServerSessionTimeout(new Runnable(){
+                             public void run() {
+
+                             	
+                                 // Try again!
+                                 //FIXME refactor into 2 methods so that we can retry this method
+                                 //doHint();
+                             }
+                         });
+                     } else {
+                         if (caught.getMessage()==null) {
+                             addSessionObject(StatusMessage.error("Error requesting a hint: " +caught.getClass()));
+                         }else {
+                             addSessionObject(StatusMessage.error("Error requesting a hint: " +caught.getMessage()));
+                         }
+                      
+                     }
+                 }
+                 @Override
+                 public void onSuccess(Hint[] result) {
+                      updateHintTabs(result);
+                      addSessionObject(StatusMessage.goodNews("Received "+result.length+" hints; Check the hint tab(s)"));
+                 }
+             });		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 		}
 
 		protected void doSubmitRPC(final Problem problem, final String text) {

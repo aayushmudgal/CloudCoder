@@ -1,0 +1,2 @@
+serviceClass: org.cloudcoder.app.client.rpc.GetCoursesAndProblemsService
+path: 3A3055C759F6B2720ECDCF793900C7BE.gwt.rpc

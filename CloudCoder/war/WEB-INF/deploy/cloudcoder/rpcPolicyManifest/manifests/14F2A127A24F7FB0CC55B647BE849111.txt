@@ -1,0 +1,2 @@
+serviceClass: org.cloudcoder.app.client.rpc.LoginService
+path: 5A5A5F0D003D7BB2999D5D5CD580F270.gwt.rpc

@@ -1,0 +1,2 @@
+serviceClass: org.cloudcoder.app.client.rpc.RunService
+path: 7341448AF7D2EBCEA2B4128C279F6D5B.gwt.rpc

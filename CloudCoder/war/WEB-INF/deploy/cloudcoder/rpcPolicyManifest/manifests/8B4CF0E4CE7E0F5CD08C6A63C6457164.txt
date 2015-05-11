@@ -1,0 +1,2 @@
+serviceClass: org.cloudcoder.app.client.rpc.EditCodeService
+path: 3F946EF2CDAF9B54DD544E242EDF2F54.gwt.rpc
