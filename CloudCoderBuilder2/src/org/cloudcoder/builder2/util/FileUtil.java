@@ -20,7 +20,6 @@ package org.cloudcoder.builder2.util;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,17 +31,16 @@ import org.slf4j.LoggerFactory;
  */
 public class FileUtil {
 	public static final Logger logger = LoggerFactory.getLogger(FileUtil.class);
-	
+
 	/**
-	 * Make a temporary directory.
-	 * 
-	 * @param config configuration properties: this should contain a "cloudcoder.builder2.tmpdir"
-	 *               property specifying the directory where temp directories should be
-	 *               created
-	 * @return a File representing the newly-created temp directory
+	 * Make a temporary directory as a subdirectory of the standard system
+	 * temp directory.
+	 *  
+	 * @return the {@link File} naming the temp directory
 	 */
-	public static File makeTempDir(Properties config) {
-		return makeTempDir(config.getProperty("cloudcoder.builder2.tmpdir"));
+	public static File makeTempDir() {
+		final File sysTempDir = new File(System.getProperty("java.io.tmpdir"));
+		return FileUtil.makeTempDir(sysTempDir.getAbsolutePath());
 	}
 
 	/**
@@ -51,11 +49,7 @@ public class FileUtil {
 	 * @param baseDir  the parent of the temporary directory to create (e.g., "/tmp")
 	 * @return a File representing the newly-created temp directory
 	 */
-	private static File makeTempDir(String baseDir) {
-		if (baseDir == null) {
-			throw new IllegalArgumentException("makeTempDir called with null baseDir");
-		}
-		
+	public static File makeTempDir(String baseDir) {
 		int attempts = 1;
 		File tempDir = null;
 	

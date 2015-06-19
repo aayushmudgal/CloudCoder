@@ -61,7 +61,7 @@ public class BytecodeToBytecodeExecutableBuildStep implements IBuildStep {
 		}
 		
 		// Create temporary directory
-		File tempDir = FileUtil.makeTempDir(config);
+		File tempDir = FileUtil.makeTempDir();
 		if (tempDir == null) {
 			// Couldn't create temp dir
 			submission.addArtifact(SubmissionResultUtil.createSubmissionResultForUnexpectedBuildError(

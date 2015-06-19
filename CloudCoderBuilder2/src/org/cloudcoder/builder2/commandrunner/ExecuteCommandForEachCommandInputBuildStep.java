@@ -1,7 +1,6 @@
 // CloudCoder - a web-based pedagogical programming environment
 // Copyright (C) 2011-2012, Jaime Spacco <jspacco@knox.edu>
 // Copyright (C) 2011-2012, David H. Hovemeyer <david.hovemeyer@gmail.com>
-// Copyright (C) 2013, York College of Pennsylvania
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -58,7 +57,7 @@ public class ExecuteCommandForEachCommandInputBuildStep implements IBuildStep {
 		// Create and start a CommandExecutor for each CommandInput
 		CommandExecutor[] commandExecutorList = new CommandExecutor[commandInputList.length];
 		for (int i = 0; i < commandInputList.length; i++) {
-			commandExecutorList[i] = new CommandExecutor(commandList[i], commandInputList[i], config);
+			commandExecutorList[i] = new CommandExecutor(commandList[i], commandInputList[i]);
 			if (prefs != null) {
 				commandExecutorList[i].setPrefs(prefs);
 			}

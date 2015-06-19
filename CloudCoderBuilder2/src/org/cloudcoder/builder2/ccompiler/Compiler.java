@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
 import org.cloudcoder.app.shared.model.CompilerDiagnostic;
@@ -56,7 +55,6 @@ public class Compiler {
 		}
 	}
 
-	private Properties config;
 	private String compilerExe;
 	private String progName;
 	private File workDir;
@@ -72,11 +70,9 @@ public class Compiler {
 	 * @param code	 the C/C++ program to compile
 	 * @param workDir  the working directory where compilation should take place
 	 * @param progName the name to be given to the resulting executable
-	 * @param config  the builder configuration properties
 	 */
-	public Compiler(String code, File workDir, String progName, Properties config) {
+	public Compiler(String code, File workDir, String progName) {
 		this(workDir, progName);
-		this.config = config;
 		addModule(progName + ".c", code);
 	}
 	
@@ -208,7 +204,7 @@ public class Compiler {
 	}
 
 	private boolean runCommand(File tempDir, String[] cmd) {
-		ProcessRunner runner = new ProcessRunner(config);
+		ProcessRunner runner = new ProcessRunner();
 		if (!runner.runSynchronous(tempDir, cmd)) {
 			statusMessage = runner.getStatusMessage();
 			return false;

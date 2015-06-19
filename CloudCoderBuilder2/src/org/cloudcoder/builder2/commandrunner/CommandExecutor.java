@@ -1,7 +1,6 @@
 // CloudCoder - a web-based pedagogical programming environment
 // Copyright (C) 2011-2012 Jaime Spacco <jspacco@knox.edu>
 // Copyright (C) 2011-2012 David H. Hovemeyer <david.hovemeyer@gmail.com>
-// Copyright (C) 2013, York College of Pennsylvania
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -17,8 +16,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package org.cloudcoder.builder2.commandrunner;
-
-import java.util.Properties;
 
 import org.cloudcoder.builder2.model.Command;
 import org.cloudcoder.builder2.model.CommandExecutionPreferences;
@@ -45,7 +42,6 @@ public class CommandExecutor implements Runnable {
 
 	private Command command;
 	private CommandInput commandInput;
-	private Properties config;
 	private CommandExecutionPreferences prefs;
 	
 	private Thread thread;
@@ -68,12 +64,10 @@ public class CommandExecutor implements Runnable {
 	 * 
 	 * @param command the {@link Command} to execute
 	 * @param commandInput the {@link CommandInput} to use to provide input to the command
-	 * @param config  builder configuration properties
 	 */
-	public CommandExecutor(Command command, CommandInput commandInput, Properties config) {
+	public CommandExecutor(Command command, CommandInput commandInput) {
 		this.command = command;
 		this.commandInput = commandInput;
-		this.config = config;
 	}
 	
 	/**
@@ -97,16 +91,18 @@ public class CommandExecutor implements Runnable {
 	 */
 	@Override
 	public void run() {
+		// FIXME: allow use of a SECCOMP sandbox
+		
 		int maxWaitTimeSec;
 		
 		ProcessRunner processRunner;
 		if (prefs != null) {
-			LimitedProcessRunner processRunner_ = new LimitedProcessRunner(config);
+			LimitedProcessRunner processRunner_ = new LimitedProcessRunner();
 			processRunner_.setPreferences(prefs);
 			processRunner = processRunner_;
 			maxWaitTimeSec = prefs.getLimit(CommandLimit.CPU_TIME_SEC) * 2;
 		} else {
-			processRunner = new ProcessRunner(config);
+			processRunner = new ProcessRunner();
 			maxWaitTimeSec = DEFAULT_MAX_TIME_IN_SECONDS;
 		}
 
@@ -139,10 +135,6 @@ public class CommandExecutor implements Runnable {
 					processRunner.getStdoutAsList(),
 					processRunner.getStderrAsList());
 		}
-		
-		if (commandResult == null) {
-			logger.error("CommandExecutor thread finishing with a null commandResult");
-		}
 	}
 
 	/**
@@ -173,11 +165,6 @@ public class CommandExecutor implements Runnable {
 					"could not join test executor after {} attempts - giving up",
 					MAX_TEST_EXECUTOR_JOIN_ATTEMPTS);
 			commandResult = new CommandResult(ProcessStatus.COULD_NOT_START, "Command executor did not finish");
-		}
-		
-		if (commandResult == null) {
-			// This absolutely should not happen.
-			logger.error("commandResult is still null as CommandExecutor is exiting?");
 		}
 	}
 	

@@ -530,7 +530,7 @@ public class DevelopmentPage extends CloudCoderPage {
 			
 			// text compiled... now testing for any feedback if there... -> update in doSu
 
-			addSessionObject(StatusMessage.pending("Requesting a hint, please wait..."));
+			addSessionObject(StatusMessage.pending("Testing your code, please wait..."));
 		    
 // 		    // Get user and problem
 //             Problem problem = getSession().get(Problem.class);
@@ -573,18 +573,18 @@ public class DevelopmentPage extends CloudCoderPage {
                              }
                          });
                      } else {
-                         if (caught.getMessage()==null) {
-                             addSessionObject(StatusMessage.error("Error requesting a hint: " +caught.getClass()));
-                         }else {
-                             addSessionObject(StatusMessage.error("Error requesting a hint: " +caught.getMessage()));
-                         }
+                         // if (caught.getMessage()==null) {
+                         //     addSessionObject(StatusMessage.error("Error requesting a hint: " +caught.getClass()));
+                         // }else {
+                         //     addSessionObject(StatusMessage.error("Error requesting a hint: " +caught.getMessage()));
+                         // }
                       
                      }
                  }
                  @Override
                  public void onSuccess(Hint[] result) {
-                      updateHintTabs(result);
-                      addSessionObject(StatusMessage.goodNews("Received "+result.length+" hints; Check the hint tab(s)"));
+                      // updateHintTabs(result);
+                      // addSessionObject(StatusMessage.goodNews("Received "+result.length+" hints; Check the hint tab(s)"));
                  }
              });		
 
